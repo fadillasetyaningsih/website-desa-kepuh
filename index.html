@@ -1,0 +1,776 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sistem Informasi Desa Kepuh</title>
+
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f3f6f4;color:#26352c}
+header{background:#176b45;color:white;padding:22px}
+header h1{margin:0 0 6px;font-size:23px}
+header p{margin:0}
+nav{background:#125437;padding:10px;display:flex;gap:7px;flex-wrap:wrap}
+nav button{background:white;color:#125437}
+button{border:0;border-radius:6px;padding:10px 14px;background:#198754;color:white;cursor:pointer;margin:3px}
+button:hover{opacity:.88}
+.danger{background:#c0392b}
+.gray{background:#64756b}
+main{max-width:1100px;margin:22px auto;padding:0 14px}
+section.panel{background:white;padding:20px;border-radius:10px;margin-bottom:18px;box-shadow:0 2px 8px #0000000c}
+h2{color:#176b45;margin-top:0}
+h3{color:#176b45}
+input,textarea,select{width:100%;padding:11px;margin:6px 0 13px;border:1px solid #ccd5cf;border-radius:6px;font:inherit}
+textarea{min-height:90px}
+label{font-weight:bold;font-size:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
+.stat{background:#e8f4ed;padding:18px;border-radius:8px}
+.stat strong{display:block;font-size:28px;color:#176b45;margin-bottom:5px}
+.item{border:1px solid #dce5df;padding:14px;border-radius:8px;margin:12px 0}
+.item h3{margin:0 0 8px}
+.hidden{display:none!important}
+#login{max-width:420px;margin:65px auto;padding:15px}
+small,.muted{color:#64756b}
+footer{text-align:center;padding:22px;color:#64756b}
+.notice{background:#fff5d9;padding:12px;border-radius:7px;margin:12px 0;color:#725414}
+.success{background:#e8f4ed;padding:10px;border-radius:7px;color:#176b45}
+.actions{margin-top:10px}
+@media(max-width:600px){header h1{font-size:19px}section.panel{padding:15px}}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>Sistem Informasi Potensi dan Profil Desa</h1>
+  <p>Desa Kepuh, Kecamatan Palimanan, Kabupaten Cirebon</p>
+</header>
+
+<!-- LOGIN -->
+<div id="login">
+<section class="panel">
+  <h2>Login Administrator</h2>
+  <label>Username</label>
+  <input id="username" value="admin" autocomplete="username">
+  <label>Password</label>
+  <input id="password" type="password" value="admin123" autocomplete="current-password">
+  <button onclick="login()">Masuk</button>
+  <p id="loginError" style="color:red"></p>
+  <small>Login demo: admin / admin123</small>
+</section>
+</div>
+
+<!-- APLIKASI -->
+<div id="app" class="hidden">
+
+<nav>
+  <button onclick="showPage('dashboard')">Beranda</button>
+  <button onclick="showPage('profil')">Profil Desa</button>
+  <button onclick="showPage('potensi')">Potensi</button>
+  <button onclick="showPage('penduduk')">Penduduk</button>
+  <button onclick="showPage('berita')">Berita</button>
+  <button onclick="showPage('publik')">Halaman Publik</button>
+  <button onclick="logout()" class="danger">Keluar</button>
+</nav>
+
+<main>
+
+<!-- DASHBOARD -->
+<section id="dashboard" class="panel">
+  <h2>Dashboard Desa Kepuh</h2>
+  <p>Selamat datang di Sistem Informasi Desa Kepuh.</p>
+
+  <div class="grid">
+    <div class="stat"><strong id="jumlahPotensi">0</strong>Potensi Desa</div>
+    <div class="stat"><strong id="jumlahPenduduk">0</strong>Data Penduduk</div>
+    <div class="stat"><strong id="jumlahBerita">0</strong>Berita Desa</div>
+  </div>
+
+  <div class="notice">
+    Data contoh ditandai sebagai ilustrasi. Silakan sesuaikan dengan data resmi pemerintah desa.
+  </div>
+  <p id="statusSimpan" class="success">Penyimpanan siap.</p>
+</section>
+
+<!-- PROFIL -->
+<section id="profil" class="panel hidden">
+  <h2>Profil Desa</h2>
+
+  <label>Nama Desa</label>
+  <input id="pNama">
+
+  <label>Kecamatan</label>
+  <input id="pKecamatan">
+
+  <label>Kabupaten</label>
+  <input id="pKabupaten">
+
+  <label>Provinsi</label>
+  <input id="pProvinsi">
+
+  <label>Nama Kepala Desa / Kuwu</label>
+  <input id="pKades" placeholder="Masukkan nama kepala desa">
+
+  <label>Luas Wilayah</label>
+  <input id="pLuas" placeholder="Contoh: 306,16 hektare">
+
+  <label>Alamat Kantor Desa</label>
+  <input id="pAlamat">
+
+  <label>Sejarah Desa</label>
+  <textarea id="pSejarah"></textarea>
+
+  <label>Deskripsi Desa</label>
+  <textarea id="pDeskripsi"></textarea>
+
+  <label>Visi Desa</label>
+  <textarea id="pVisi"></textarea>
+
+  <label>Misi Desa</label>
+  <textarea id="pMisi"></textarea>
+
+  <button onclick="simpanProfil()">Simpan Profil</button>
+</section>
+
+<!-- POTENSI -->
+<section id="potensi" class="panel hidden">
+  <h2>Potensi Desa</h2>
+
+  <input type="hidden" id="potensiEdit">
+
+  <label>Nama Potensi</label>
+  <input id="potensiNama" placeholder="Contoh: Pertanian">
+
+  <label>Kategori</label>
+  <select id="potensiKategori">
+    <option>Pertanian</option>
+    <option>Peternakan</option>
+    <option>UMKM</option>
+    <option>Wisata</option>
+    <option>Perdagangan</option>
+    <option>Kerajinan</option>
+    <option>Lainnya</option>
+  </select>
+
+  <label>Deskripsi Potensi</label>
+  <textarea id="potensiDeskripsi"></textarea>
+
+  <button onclick="simpanPotensi()">Simpan Potensi</button>
+  <button class="gray" onclick="resetPotensi()">Batal</button>
+
+  <h3>Daftar Potensi Desa</h3>
+  <div id="daftarPotensi"></div>
+</section>
+
+<!-- PENDUDUK -->
+<section id="penduduk" class="panel hidden">
+  <h2>Data Penduduk</h2>
+
+  <div class="notice">
+    Masukkan data sesuai kebutuhan. Hindari memasukkan NIK atau informasi pribadi sensitif ke website demo ini.
+  </div>
+
+  <input type="hidden" id="pendudukEdit">
+
+  <label>Nama</label>
+  <input id="wNama">
+
+  <label>Jenis Kelamin</label>
+  <select id="wGender">
+    <option>Laki-laki</option>
+    <option>Perempuan</option>
+  </select>
+
+  <label>Usia</label>
+  <input id="wUsia" type="number" min="0">
+
+  <label>Pekerjaan</label>
+  <input id="wPekerjaan">
+
+  <label>Dusun / Alamat</label>
+  <input id="wAlamat">
+
+  <button onclick="simpanPenduduk()">Simpan Data</button>
+  <button class="gray" onclick="resetPenduduk()">Batal</button>
+
+  <h3>Daftar Penduduk</h3>
+  <div id="daftarPenduduk"></div>
+</section>
+
+<!-- BERITA -->
+<section id="berita" class="panel hidden">
+  <h2>Berita Desa</h2>
+
+  <input type="hidden" id="beritaEdit">
+
+  <label>Judul Berita</label>
+  <input id="bJudul">
+
+  <label>Tanggal</label>
+  <input id="bTanggal" type="date">
+
+  <label>Isi Berita</label>
+  <textarea id="bIsi"></textarea>
+
+  <button onclick="simpanBerita()">Simpan Berita</button>
+  <button class="gray" onclick="resetBerita()">Batal</button>
+
+  <h3>Daftar Berita</h3>
+  <div id="daftarBerita"></div>
+</section>
+
+<!-- HALAMAN PUBLIK -->
+<section id="publik" class="panel hidden">
+  <h2>Halaman Informasi Publik Desa Kepuh</h2>
+  <div id="publikProfil"></div>
+
+  <hr>
+  <h3>Potensi Desa</h3>
+  <div id="publikPotensi"></div>
+
+  <hr>
+  <h3>Berita Desa</h3>
+  <div id="publikBerita"></div>
+</section>
+
+</main>
+</div>
+
+<footer>
+  © Sistem Informasi Potensi dan Profil Desa Kepuh
+</footer>
+
+<script>
+/* =====================================
+   DATABASE DAN PENYIMPANAN
+===================================== */
+
+const KUNCI_DB = "sidesa_kepuh_database_v3";
+
+const dataAwal = {
+  profil: {
+    nama: "Desa Kepuh",
+    kecamatan: "Palimanan",
+    kabupaten: "Cirebon",
+    provinsi: "Jawa Barat",
+    kades: "Belum dikonfirmasi",
+    luas: "306,16 hektare (perlu verifikasi)",
+    alamat: "Desa Kepuh, Kecamatan Palimanan, Kabupaten Cirebon",
+    sejarah: "Desa Kepuh memiliki cerita asal-usul nama yang dikaitkan dengan pohon Kepuh. Menurut cerita yang berkembang di masyarakat, nama tersebut berkaitan dengan keberadaan pohon Kepuh di wilayah desa. Sejarah dan kisah para pemimpin desa perlu dilengkapi berdasarkan keterangan sesepuh dan arsip pemerintah desa.",
+    deskripsi: "Desa Kepuh berada di Kecamatan Palimanan, Kabupaten Cirebon, Provinsi Jawa Barat. Desa memiliki potensi sumber daya alam, kegiatan ekonomi masyarakat, serta kehidupan sosial dan budaya yang dapat terus dikembangkan.",
+    visi: "Terwujudnya Desa Kepuh yang maju, mandiri, sejahtera, religius, dan berdaya saing melalui peningkatan kualitas pelayanan pemerintahan serta pengembangan potensi desa.",
+    misi: "1. Meningkatkan kualitas pelayanan pemerintahan desa yang transparan dan bertanggung jawab.\n2. Mengembangkan potensi pertanian, UMKM, dan ekonomi masyarakat.\n3. Meningkatkan pembangunan infrastruktur dan fasilitas umum.\n4. Meningkatkan kualitas pendidikan, kesehatan, dan kesejahteraan masyarakat.\n5. Memperkuat gotong royong, keamanan, dan pelestarian lingkungan."
+  },
+
+  potensi: [
+    {
+      nama: "Pertanian dan Perkebunan",
+      kategori: "Pertanian",
+      deskripsi: "Kegiatan pertanian dan perkebunan masyarakat dapat menjadi salah satu sumber ekonomi desa. Pengembangan dapat dilakukan melalui peningkatan produktivitas, pengolahan hasil panen, dan pemasaran."
+    },
+    {
+      nama: "Usaha Mikro, Kecil, dan Menengah",
+      kategori: "UMKM",
+      deskripsi: "Usaha rumahan, kuliner, perdagangan kecil, dan produk lokal dapat dikembangkan melalui pembinaan usaha, peningkatan kualitas produk, serta pemasaran digital."
+    },
+    {
+      nama: "Peternakan Masyarakat",
+      kategori: "Peternakan",
+      deskripsi: "Peternakan skala rumah tangga berpotensi menjadi sumber pendapatan tambahan masyarakat."
+    },
+    {
+      nama: "Taman Raden Benadi",
+      kategori: "Wisata",
+      deskripsi: "Taman Raden Benadi dapat diperkenalkan sebagai salah satu potensi wisata lokal dan ruang kegiatan masyarakat. Informasi fasilitas dan pengelola perlu dilengkapi."
+    },
+    {
+      nama: "Perdagangan dan Jasa",
+      kategori: "Perdagangan",
+      deskripsi: "Kegiatan perdagangan dan jasa masyarakat dapat mendukung perputaran ekonomi serta memenuhi kebutuhan warga."
+    }
+  ],
+
+  penduduk: [],
+
+  berita: [
+    {
+      judul: "Gotong Royong Warga Desa Kepuh dalam Menjaga Kebersihan Lingkungan",
+      tanggal: "2026-11-18",
+      isi: "Gotong royong merupakan salah satu bentuk kebersamaan dan kepedulian masyarakat terhadap lingkungan sekitar. Melalui kegiatan kerja bakti, masyarakat dapat membersihkan lingkungan, merapikan saluran air, dan menjaga fasilitas umum. Naskah ini merupakan contoh berita dan perlu disesuaikan dengan kegiatan yang benar-benar dilaksanakan."
+    },
+    {
+      judul: "Pengembangan UMKM Desa Kepuh untuk Meningkatkan Kesejahteraan Masyarakat",
+      tanggal: "2026-11-18",
+      isi: "Usaha mikro, kecil, dan menengah memiliki peluang untuk mendukung perekonomian masyarakat. Pengembangan usaha dapat dilakukan melalui peningkatan kualitas produk, kemasan, dan pemasaran. Naskah ini merupakan contoh konten website."
+    },
+    {
+      judul: "Mengenal Potensi Wisata Taman Raden Benadi Desa Kepuh",
+      tanggal: "2026-11-18",
+      isi: "Potensi wisata lokal dapat menjadi salah satu daya tarik desa. Taman Raden Benadi dapat diperkenalkan melalui informasi sejarah, fasilitas, dan kegiatan masyarakat setelah data lapangan dikonfirmasi."
+    }
+  ]
+};
+
+function salin(objek) {
+  return JSON.parse(JSON.stringify(objek));
+}
+
+function bacaDatabase() {
+  try {
+    const tersimpan = localStorage.getItem(KUNCI_DB);
+    if (tersimpan) {
+      const hasil = JSON.parse(tersimpan);
+      if (hasil.profil && hasil.potensi && hasil.penduduk && hasil.berita) {
+        return hasil;
+      }
+    }
+  } catch (error) {
+    alert("Data tidak dapat dibaca. Periksa pengaturan penyimpanan browser.");
+  }
+  return salin(dataAwal);
+}
+
+let database = bacaDatabase();
+
+let profil = database.profil;
+let potensi = database.potensi;
+let penduduk = database.penduduk;
+let berita = database.berita;
+
+function simpanDatabase() {
+  try {
+    database = {
+      profil: profil,
+      potensi: potensi,
+      penduduk: penduduk,
+      berita: berita
+    };
+
+    const teks = JSON.stringify(database);
+    localStorage.setItem(KUNCI_DB, teks);
+
+    // Pastikan data benar-benar bisa dibaca kembali
+    const cek = localStorage.getItem(KUNCI_DB);
+    if (!cek || JSON.parse(cek).berita.length !== berita.length) {
+      throw new Error("Verifikasi gagal");
+    }
+
+    const status = document.getElementById("statusSimpan");
+    if (status) {
+      status.textContent = "✓ Data berhasil disimpan di browser.";
+    }
+    return true;
+
+  } catch (error) {
+    alert(
+      "Data gagal disimpan oleh browser.\n\n" +
+      "Pastikan penyimpanan browser aktif. Jika membuka file HTML " +
+      "langsung dari file://, coba gunakan hosting HTTPS."
+    );
+    return false;
+  }
+}
+
+/* =====================================
+   LOGIN DAN LOGOUT
+===================================== */
+
+function login() {
+  const user = document.getElementById("username").value;
+  const pass = document.getElementById("password").value;
+
+  if (user === "admin" && pass === "admin123") {
+    sessionStorage.setItem("kepuh_login", "aktif");
+    bukaAplikasi();
+  } else {
+    document.getElementById("loginError").textContent =
+      "Username atau password salah.";
+  }
+}
+
+function bukaAplikasi() {
+  document.getElementById("login").classList.add("hidden");
+  document.getElementById("app").classList.remove("hidden");
+
+  isiFormProfil();
+  renderSemua();
+}
+
+function logout() {
+  sessionStorage.removeItem("kepuh_login");
+  document.getElementById("app").classList.add("hidden");
+  document.getElementById("login").classList.remove("hidden");
+}
+
+function showPage(id) {
+  document.querySelectorAll("main section").forEach(function(el) {
+    el.classList.add("hidden");
+  });
+
+  document.getElementById(id).classList.remove("hidden");
+
+  if (id === "publik") {
+    renderPublik();
+  }
+}
+
+/* =====================================
+   FUNGSI KEAMANAN TAMPILAN TEKS
+===================================== */
+
+function aman(teks) {
+  return String(teks ?? "").replace(/[&<>"']/g, function(huruf) {
+    return {
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;"
+    }[huruf];
+  });
+}
+
+function formatTeks(teks) {
+  return aman(teks).replace(/\n/g, "<br>");
+}
+
+/* =====================================
+   PROFIL DESA
+===================================== */
+
+function isiFormProfil() {
+  document.getElementById("pNama").value = profil.nama;
+  document.getElementById("pKecamatan").value = profil.kecamatan;
+  document.getElementById("pKabupaten").value = profil.kabupaten;
+  document.getElementById("pProvinsi").value = profil.provinsi;
+  document.getElementById("pKades").value = profil.kades;
+  document.getElementById("pLuas").value = profil.luas;
+  document.getElementById("pAlamat").value = profil.alamat;
+  document.getElementById("pSejarah").value = profil.sejarah;
+  document.getElementById("pDeskripsi").value = profil.deskripsi;
+  document.getElementById("pVisi").value = profil.visi;
+  document.getElementById("pMisi").value = profil.misi;
+}
+
+function simpanProfil() {
+  profil = {
+    nama: document.getElementById("pNama").value,
+    kecamatan: document.getElementById("pKecamatan").value,
+    kabupaten: document.getElementById("pKabupaten").value,
+    provinsi: document.getElementById("pProvinsi").value,
+    kades: document.getElementById("pKades").value,
+    luas: document.getElementById("pLuas").value,
+    alamat: document.getElementById("pAlamat").value,
+    sejarah: document.getElementById("pSejarah").value,
+    deskripsi: document.getElementById("pDeskripsi").value,
+    visi: document.getElementById("pVisi").value,
+    misi: document.getElementById("pMisi").value
+  };
+
+  if (simpanDatabase()) {
+    alert("Profil Desa berhasil disimpan.");
+    renderPublik();
+  }
+}
+
+/* =====================================
+   CRUD POTENSI DESA
+===================================== */
+
+function resetPotensi() {
+  document.getElementById("potensiEdit").value = "";
+  document.getElementById("potensiNama").value = "";
+  document.getElementById("potensiDeskripsi").value = "";
+  document.getElementById("potensiKategori").selectedIndex = 0;
+}
+
+function simpanPotensi() {
+  const index = document.getElementById("potensiEdit").value;
+
+  const data = {
+    nama: document.getElementById("potensiNama").value.trim(),
+    kategori: document.getElementById("potensiKategori").value,
+    deskripsi: document.getElementById("potensiDeskripsi").value.trim()
+  };
+
+  if (!data.nama) {
+    alert("Nama potensi harus diisi.");
+    return;
+  }
+
+  if (index === "") {
+    potensi.push(data);
+  } else {
+    potensi[Number(index)] = data;
+  }
+
+  if (simpanDatabase()) {
+    resetPotensi();
+    renderSemua();
+    alert("Data potensi berhasil disimpan.");
+  }
+}
+
+function editPotensi(i) {
+  const data = potensi[i];
+  document.getElementById("potensiEdit").value = i;
+  document.getElementById("potensiNama").value = data.nama;
+  document.getElementById("potensiKategori").value = data.kategori;
+  document.getElementById("potensiDeskripsi").value = data.deskripsi;
+  window.scrollTo(0, 0);
+}
+
+function hapusPotensi(i) {
+  if (confirm("Yakin ingin menghapus potensi ini?")) {
+    const lama = salin(potensi);
+    potensi.splice(i, 1);
+    if (!simpanDatabase()) potensi = lama;
+    renderSemua();
+  }
+}
+
+/* =====================================
+   CRUD PENDUDUK
+===================================== */
+
+function resetPenduduk() {
+  document.getElementById("pendudukEdit").value = "";
+  document.getElementById("wNama").value = "";
+  document.getElementById("wUsia").value = "";
+  document.getElementById("wPekerjaan").value = "";
+  document.getElementById("wAlamat").value = "";
+  document.getElementById("wGender").selectedIndex = 0;
+}
+
+function simpanPenduduk() {
+  const index = document.getElementById("pendudukEdit").value;
+
+  const data = {
+    nama: document.getElementById("wNama").value.trim(),
+    gender: document.getElementById("wGender").value,
+    usia: document.getElementById("wUsia").value,
+    pekerjaan: document.getElementById("wPekerjaan").value.trim(),
+    alamat: document.getElementById("wAlamat").value.trim()
+  };
+
+  if (!data.nama) {
+    alert("Nama harus diisi.");
+    return;
+  }
+
+  if (index === "") {
+    penduduk.push(data);
+  } else {
+    penduduk[Number(index)] = data;
+  }
+
+  if (simpanDatabase()) {
+    resetPenduduk();
+    renderSemua();
+    alert("Data penduduk berhasil disimpan.");
+  }
+}
+
+function editPenduduk(i) {
+  const data = penduduk[i];
+  document.getElementById("pendudukEdit").value = i;
+  document.getElementById("wNama").value = data.nama;
+  document.getElementById("wGender").value = data.gender;
+  document.getElementById("wUsia").value = data.usia;
+  document.getElementById("wPekerjaan").value = data.pekerjaan;
+  document.getElementById("wAlamat").value = data.alamat;
+  window.scrollTo(0, 0);
+}
+
+function hapusPenduduk(i) {
+  if (confirm("Yakin ingin menghapus data penduduk ini?")) {
+    const lama = salin(penduduk);
+    penduduk.splice(i, 1);
+    if (!simpanDatabase()) penduduk = lama;
+    renderSemua();
+  }
+}
+
+/* =====================================
+   CRUD BERITA
+===================================== */
+
+function resetBerita() {
+  document.getElementById("beritaEdit").value = "";
+  document.getElementById("bJudul").value = "";
+  document.getElementById("bTanggal").value = "";
+  document.getElementById("bIsi").value = "";
+}
+
+function simpanBerita() {
+  const index = document.getElementById("beritaEdit").value;
+
+  const data = {
+    judul: document.getElementById("bJudul").value.trim(),
+    tanggal: document.getElementById("bTanggal").value,
+    isi: document.getElementById("bIsi").value.trim()
+  };
+
+  if (!data.judul || !data.isi) {
+    alert("Judul dan isi berita harus diisi.");
+    return;
+  }
+
+  if (index === "") {
+    berita.unshift(data);
+  } else {
+    berita[Number(index)] = data;
+  }
+
+  if (simpanDatabase()) {
+    resetBerita();
+    renderSemua();
+    alert("Berita berhasil disimpan.");
+  }
+}
+
+function editBerita(i) {
+  const data = berita[i];
+  document.getElementById("beritaEdit").value = i;
+  document.getElementById("bJudul").value = data.judul;
+  document.getElementById("bTanggal").value = data.tanggal;
+  document.getElementById("bIsi").value = data.isi;
+  window.scrollTo(0, 0);
+}
+
+function hapusBerita(i) {
+  if (confirm("Yakin ingin menghapus berita ini?")) {
+    const lama = salin(berita);
+    berita.splice(i, 1);
+    if (!simpanDatabase()) berita = lama;
+    renderSemua();
+  }
+}
+
+/* =====================================
+   TAMPILKAN DATA
+===================================== */
+
+function renderPotensi() {
+  document.getElementById("daftarPotensi").innerHTML =
+    potensi.map(function(x, i) {
+      return `
+        <div class="item">
+          <h3>${aman(x.nama)}</h3>
+          <small>${aman(x.kategori)}</small>
+          <p>${formatTeks(x.deskripsi)}</p>
+          <div class="actions">
+            <button onclick="editPotensi(${i})">Edit</button>
+            <button class="danger" onclick="hapusPotensi(${i})">Hapus</button>
+          </div>
+        </div>`;
+    }).join("") || "<p>Belum ada data potensi.</p>";
+}
+
+function renderPenduduk() {
+  document.getElementById("daftarPenduduk").innerHTML =
+    penduduk.map(function(x, i) {
+      return `
+        <div class="item">
+          <h3>${aman(x.nama)}</h3>
+          <p>${aman(x.gender)} · ${aman(x.usia)} tahun</p>
+          <p>Pekerjaan: ${aman(x.pekerjaan)}</p>
+          <p>Alamat: ${aman(x.alamat)}</p>
+          <button onclick="editPenduduk(${i})">Edit</button>
+          <button class="danger" onclick="hapusPenduduk(${i})">Hapus</button>
+        </div>`;
+    }).join("") || "<p>Belum ada data penduduk.</p>";
+}
+
+function renderBerita() {
+  document.getElementById("daftarBerita").innerHTML =
+    berita.map(function(x, i) {
+      return `
+        <div class="item">
+          <h3>${aman(x.judul)}</h3>
+          <small>${aman(x.tanggal)}</small>
+          <p>${formatTeks(x.isi)}</p>
+          <button onclick="editBerita(${i})">Edit</button>
+          <button class="danger" onclick="hapusBerita(${i})">Hapus</button>
+        </div>`;
+    }).join("") || "<p>Belum ada berita.</p>";
+}
+
+function renderPublik() {
+  document.getElementById("publikProfil").innerHTML = `
+    <h3>${aman(profil.nama)}</h3>
+    <p>${formatTeks(profil.deskripsi)}</p>
+    <p><b>Kecamatan:</b> ${aman(profil.kecamatan)}</p>
+    <p><b>Kabupaten:</b> ${aman(profil.kabupaten)}</p>
+    <p><b>Provinsi:</b> ${aman(profil.provinsi)}</p>
+    <p><b>Kepala Desa:</b> ${aman(profil.kades)}</p>
+    <p><b>Luas Wilayah:</b> ${aman(profil.luas)}</p>
+    <p><b>Alamat:</b> ${aman(profil.alamat)}</p>
+    <h3>Sejarah Desa</h3>
+    <p>${formatTeks(profil.sejarah)}</p>
+    <h3>Visi</h3>
+    <p>${formatTeks(profil.visi)}</p>
+    <h3>Misi</h3>
+    <p>${formatTeks(profil.misi)}</p>
+  `;
+
+  document.getElementById("publikPotensi").innerHTML =
+    potensi.map(function(x) {
+      return `<div class="item"><b>${aman(x.nama)}</b>
+      <p>${formatTeks(x.deskripsi)}</p></div>`;
+    }).join("") || "<p>Belum ada data potensi.</p>";
+
+  document.getElementById("publikBerita").innerHTML =
+    berita.map(function(x) {
+      return `<div class="item"><h3>${aman(x.judul)}</h3>
+      <small>${aman(x.tanggal)}</small>
+      <p>${formatTeks(x.isi)}</p></div>`;
+    }).join("") || "<p>Belum ada berita.</p>";
+}
+
+function renderSemua() {
+  document.getElementById("jumlahPotensi").textContent = potensi.length;
+  document.getElementById("jumlahPenduduk").textContent = penduduk.length;
+  document.getElementById("jumlahBerita").textContent = berita.length;
+
+  renderPotensi();
+  renderPenduduk();
+  renderBerita();
+  renderPublik();
+}
+
+/* =====================================
+   CEK PENYIMPANAN DAN MULAI
+===================================== */
+
+function tesPenyimpanan() {
+  try {
+    const kunciTes = "__tes_sidesa_kepuh__";
+    localStorage.setItem(kunciTes, "OK");
+    const hasil = localStorage.getItem(kunciTes);
+    localStorage.removeItem(kunciTes);
+    return hasil === "OK";
+  } catch (error) {
+    return false;
+  }
+}
+
+window.addEventListener("load", function() {
+  if (!tesPenyimpanan()) {
+    alert(
+      "Penyimpanan browser tidak tersedia. " +
+      "Coba buka file ini melalui browser lain atau hosting HTTPS."
+    );
+  }
+
+  if (sessionStorage.getItem("kepuh_login") === "aktif") {
+    bukaAplikasi();
+  }
+});
+</script>
+
+</body>
+</html>
+
